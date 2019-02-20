@@ -1,0 +1,23 @@
+{
+  "name": "react-native-photos",
+  "description": "IOS photo library UI built with React Native",
+  "main": "./index.js",
+  "scripts": {
+    "start": "expo start",
+    "ios": "expo start --ios",
+    "eject": "expo eject"
+  },
+  "dependencies": {
+    "expo": "^32.0.0",
+    "moment": "^2.24.0",
+    "react": "16.5.0",
+    "react-native": "https://github.com/expo/react-native/archive/sdk-32.0.0.tar.gz",
+    "react-native-gesture-handler": "^1.0.15",
+    "react-navigation": "^3.3.0"
+  },
+  "devDependencies": {
+    "@types/react-native": "^0.57.36",
+    "babel-preset-expo": "^5.0.0"
+  },
+  "private": true
+}
