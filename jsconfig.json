@@ -1,0 +1,14 @@
+{
+  "exclude": ["node_modules", "private", ".vscode", ".expo"],
+  "checkJs": false,
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@data/*": ["./data/*"],
+      "@assets/*": ["./assets/*"],
+      "@screens/*": ["./src/screens/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@store/*": ["./src/store/*"]
+    }
+  }
+}
