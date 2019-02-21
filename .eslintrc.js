@@ -33,9 +33,11 @@ module.exports = {
     'global-require': 'off',
     'class-methods-use-this': 'off',
     'arrow-parens': 'off',
-    'no-else-return': 'off'
+    'no-else-return': 'off',
+    "no-console": 'off' // @FIXME turn this back on later
   },
   globals: {
-    fetch: false
+    fetch: false,
+    "__DEV__": "readonly"
   }
 }

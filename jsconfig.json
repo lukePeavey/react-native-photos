@@ -8,6 +8,7 @@
       "@assets/*": ["./assets/*"],
       "@screens/*": ["./src/screens/*"],
       "@utils/*": ["./src/utils/*"],
+      "@store": ["./src/store"],
       "@store/*": ["./src/store/*"]
     }
   }
