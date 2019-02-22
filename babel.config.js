@@ -12,9 +12,10 @@ module.exports = function(api) {
           '@screens': './src/screens',
           '@utils': './src/utils',
           '@store': './src/store',
-        }
-      }
-    ]
+          '@navigation': './src/navigation',
+        },
+      },
+    ],
   ]
   const presets = ['babel-preset-expo']
   return { presets, plugins }

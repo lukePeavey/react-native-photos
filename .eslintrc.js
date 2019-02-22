@@ -2,7 +2,7 @@ module.exports = {
   extends: ['airbnb', 'prettier'],
   parser: 'babel-eslint',
   env: {
-    jest: true
+    jest: true,
   },
   settings: {
     'import/resolver': {
@@ -14,9 +14,10 @@ module.exports = {
           '@screens': './src/screens',
           '@utils': './src/utils',
           '@store': './src/store',
-        }
-      }
-    }
+          '@navigation': './src/navigation',
+        },
+      },
+    },
   },
   rules: {
     'react/jsx-filename-extension': 'off',
@@ -34,10 +35,10 @@ module.exports = {
     'class-methods-use-this': 'off',
     'arrow-parens': 'off',
     'no-else-return': 'off',
-    "no-console": 'off' // @FIXME turn this back on later
+    'no-console': 'off', // @FIXME turn this back on later
   },
   globals: {
     fetch: false,
-    "__DEV__": "readonly"
-  }
+    __DEV__: 'readonly',
+  },
 }
