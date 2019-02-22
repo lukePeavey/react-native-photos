@@ -1,1 +1,1 @@
-export { default } from './PhotosScreen'
+export { default } from './PhotoScreenContainer'
