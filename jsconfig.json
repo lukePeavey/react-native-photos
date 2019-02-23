@@ -10,7 +10,8 @@
       "@utils/*": ["./src/utils/*"],
       "@store": ["./src/store"],
       "@store/*": ["./src/store/*"],
-      "@navigation/*": ["./src/navigation/*"]
+      "@navigation/*": ["./src/navigation/*"],
+      "@views/*": ["./src/views/*"]
     }
   }
 }
