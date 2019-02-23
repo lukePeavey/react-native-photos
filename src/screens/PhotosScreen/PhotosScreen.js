@@ -1,16 +1,25 @@
-/* eslint-disable no-unused-vars */
 import React from 'react'
-import { View, Image, Platform, Text, StyleSheet } from 'react-native'
-import { ScrollView } from 'react-navigation'
+import {
+  View,
+  Image,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Platform,
+  TouchableWithoutFeedback,
+} from 'react-native'
 import PropTypes from 'prop-types'
-import { ScreenPropType } from '../../types'
 
+const IS_TABLET = Platform.OS === 'ios' && Platform.isPad
 const SPACING = 8
 const ASPECT_RATIO = 1
-const RESIZE_MODE = Platform.isPad ? 'contain' : 'cover'
-const IS_TABLET = Platform.OS === 'ios' && Platform.isPad
+const RESIZE_MODE = IS_TABLET ? 'contain' : 'cover'
 
 const propTypes = {
+  /** React navigation prop */
+  navigation: PropTypes.shape({
+    navigate: PropTypes.func.isRequired,
+  }).isRequired,
   /** Screen dimensions */
   screen: PropTypes.shape({
     width: PropTypes.number.isRequired,
@@ -38,7 +47,7 @@ export default class PhotoScreen extends React.Component {
   static propTypes = propTypes
 
   /** The number of columns in the image grid */
-  get columns() {
+  get _columns() {
     const { screen } = this.props
     if (IS_TABLET) {
       return screen.isLandscape ? 7 : 5
@@ -47,15 +56,24 @@ export default class PhotoScreen extends React.Component {
   }
 
   /** The width height of each image */
-  get imageSize() {
+  get _imageSize() {
     const { screen } = this.props
-    const width = (screen.width - SPACING) / this.columns
+    const width = (screen.width - SPACING) / this._columns
 
     return { width, height: width * ASPECT_RATIO }
   }
 
+  _handlePressImage = (image, index) => {
+    const { navigation } = this.props
+    navigation.navigate('SlideShow', {
+      initialIndex: index,
+      isFullscreen: true,
+      image,
+    })
+  }
+
   /** Renders the header for each image collection */
-  _renderSectionHeader = (section, index) => {
+  _renderSectionHeader = section => {
     return (
       <View style={styles.sectionHeader}>
         <Text style={styles.title}>{section.location}</Text>
@@ -64,27 +82,39 @@ export default class PhotoScreen extends React.Component {
     )
   }
 
-  /** Renders an individual item */
+  /**
+   * Renders an individual item.
+   */
   _renderItem = (item, index) => {
     return (
-      <View style={[styles.item, this.imageSize]} key={item.id}>
-        <Image
-          source={{ uri: `${item.bucket}/${item.id}--200.jpg` }}
-          style={styles.image}
-          resizeMode={RESIZE_MODE}
-        />
-      </View>
+      <TouchableWithoutFeedback
+        onPress={() => this._handlePressImage(item, index)}
+        key={item.id}
+      >
+        <View style={[styles.item, this._imageSize]} key={item.id}>
+          <Image
+            source={{ uri: `${item.bucket}/${item.id}--200.jpg` }}
+            style={styles.image}
+            resizeMode={RESIZE_MODE}
+          />
+        </View>
+      </TouchableWithoutFeedback>
     )
   }
 
   render() {
     const { collections } = this.props
+    // Images are grouped into collections. `itemIndex` is the index relative
+    // to all images. This value is passed to `this._renderItem`
+    let itemIndex = -1
     return (
       <ScrollView style={styles.container}>
-        {collections.map((collection, index) => (
+        {collections.map(collection => (
           <View style={styles.grid} key={collection.id}>
-            {this._renderSectionHeader(collection, index)}
-            {collection.images.map(this._renderItem)}
+            {this._renderSectionHeader(collection)}
+            {collection.images.map(image =>
+              this._renderItem(image, (itemIndex += 1))
+            )}
           </View>
         ))}
       </ScrollView>
