@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { ScreenOrientation } from 'expo'
 import { actions } from '@store'
-import AppNavigator from '@navigation/tabNavigator'
+import AppNavigator from '@navigation/appNavigator'
 
 const propTypes = {
   dispatch: PropTypes.func.isRequired,

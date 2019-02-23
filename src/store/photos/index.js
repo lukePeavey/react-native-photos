@@ -1,6 +1,6 @@
-import images from '@data/images.json'
-import collections from '@data/collections.json'
-import albums from '@data/albums.json'
+import _images from '@data/images.json'
+import _collections from '@data/collections.json'
+import _albums from '@data/albums.json'
 
 /**
 |--------------------------------------------------
@@ -16,9 +16,9 @@ export const actions = {}
 |--------------------------------------------------
 */
 export const initialState = {
-  images,
-  collections,
-  albums,
+  images: _images,
+  collections: _collections,
+  albums: _albums,
 }
 
 export default function photosReducer(state = initialState, action) {
@@ -35,13 +35,19 @@ export default function photosReducer(state = initialState, action) {
 |--------------------------------------------------
 */
 export const selectors = {
+  /** Get all photos */
+  getPhotos(state) {
+    return Object.values(state.photos.images)
+  },
+
+  /** Get single photo by ID */
   getPhotoById(state, id) {
     return state.photos.images.find(image => image.id === id)
   },
 
   /** Gets the photos from a given collection by ID */
   getPhotosByCollection(state, collectionID) {
-    return state.photos.images.filter(
+    return Object.values(state.photos.images).filter(
       image => image.collection === collectionID
     )
   },
@@ -55,9 +61,16 @@ export const selectors = {
   },
 
   getAlbums(state) {
-    return state.photos.albums.map(album => ({
-      ...album,
-      images: album.id === 'camera-roll' ? state.photos.images : album.images,
-    }))
+    return state.photos.albums.map(album => {
+      const isCameralRoll = album.id === 'camera-roll'
+      const images = isCameralRoll
+        ? Object.values(state.photos.images)
+        : album.images.map(id => state.photos.images[id])
+      return {
+        ...album,
+        images,
+        coverImage: images[0],
+      }
+    })
   },
 }
