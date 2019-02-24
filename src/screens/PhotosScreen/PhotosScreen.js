@@ -9,9 +9,10 @@ import {
   TouchableWithoutFeedback,
 } from 'react-native'
 import PropTypes from 'prop-types'
+import imageURI from '@utils/imageURI'
 
 const IS_TABLET = Platform.OS === 'ios' && Platform.isPad
-const SPACING = 8
+const GUTTERS = IS_TABLET ? 16 : 2
 const ASPECT_RATIO = 1
 const RESIZE_MODE = IS_TABLET ? 'contain' : 'cover'
 
@@ -43,8 +44,10 @@ const propTypes = {
  * Photos are displayed as a grid of small thumbnail images, and grouped
  * into sections called collections.
  */
-export default class PhotoScreen extends React.Component {
-  static propTypes = propTypes
+export default class PhotosScreen extends React.Component {
+  static navigationOptions = ({ navigation }) => ({
+    title: 'Photos',
+  })
 
   /** The number of columns in the image grid */
   get _columns() {
@@ -58,7 +61,7 @@ export default class PhotoScreen extends React.Component {
   /** The width height of each image */
   get _imageSize() {
     const { screen } = this.props
-    const width = (screen.width - SPACING) / this._columns
+    const width = (screen.width - GUTTERS * 2) / this._columns
 
     return { width, height: width * ASPECT_RATIO }
   }
@@ -93,7 +96,7 @@ export default class PhotoScreen extends React.Component {
       >
         <View style={[styles.item, this._imageSize]} key={item.id}>
           <Image
-            source={{ uri: `${item.bucket}/${item.id}--200.jpg` }}
+            source={{ uri: imageURI(item.id, 200) }}
             style={styles.image}
             resizeMode={RESIZE_MODE}
           />
@@ -122,10 +125,12 @@ export default class PhotoScreen extends React.Component {
   }
 }
 
+PhotosScreen.propTypes = propTypes
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: SPACING / 2,
+    paddingHorizontal: GUTTERS,
   },
   grid: {
     position: 'relative',
@@ -133,18 +138,17 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   item: {
-    padding: SPACING / 2,
+    padding: IS_TABLET ? 4 : StyleSheet.hairlineWidth,
   },
   image: {
     width: '100%',
     height: '100%',
-    backgroundColor: '#eee',
   },
   sectionHeader: {
     minWidth: '100%',
-    marginHorizontal: SPACING / 2,
-    marginTop: 20,
-    marginBottom: SPACING,
+    marginHorizontal: IS_TABLET ? 4 : 8,
+    marginTop: IS_TABLET ? 20 : 28,
+    marginBottom: IS_TABLET ? 8 : 16,
   },
   title: {
     fontSize: 18,
@@ -153,5 +157,6 @@ const styles = StyleSheet.create({
   },
   subTitle: {
     fontSize: 14,
+    color: 'rgba(0,0,0,0.45)',
   },
 })
