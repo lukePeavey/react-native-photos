@@ -7,7 +7,6 @@ import {
   Text,
   Image,
   TouchableWithoutFeedback,
-  Platform,
 } from 'react-native'
 import PropTypes from 'prop-types'
 import imageURI from '@utils/imageURI'
@@ -42,8 +41,11 @@ const propTypes = {
 /**
  * This screen displays a list of the user's albums.
  */
-export default class MyAlbums extends React.Component {
-  static propTypes = propTypes
+export default class AlbumsScreen extends React.Component {
+  static navigationOptions = ({ navigation }) => ({
+    title: 'My Albums',
+    headerBackTitle: 'Albums',
+  })
 
   get _columns() {
     const { screen } = this.props
@@ -57,6 +59,14 @@ export default class MyAlbums extends React.Component {
     return { width, height: width * ASPECT_RATIO }
   }
 
+  _handlePress = album => () => {
+    const { navigation } = this.props
+    navigation.navigate('SingleAlbum', {
+      title: album.title,
+      id: album.id,
+    })
+  }
+
   render() {
     const { albums } = this.props
     return (
@@ -64,23 +74,29 @@ export default class MyAlbums extends React.Component {
         {albums.map(album => {
           const { coverImage, count } = album
           return (
-            <View style={[styles.gridItem]} key={album.id}>
-              <Image
-                source={{ uri: imageURI(coverImage.id, 200) }}
-                style={[styles.albumCover, this._imageSize]}
-                resizeMode="cover"
-              />
-              <View style={styles.albumLabel}>
-                <Text style={styles.primaryText}>{album.title}</Text>
-                <Text style={styles.secondaryText}>{count}</Text>
+            <TouchableWithoutFeedback
+              onPress={this._handlePress(album)}
+              key={album.id}
+            >
+              <View style={[styles.gridItem]}>
+                <Image
+                  source={{ uri: imageURI(coverImage.id, 200) }}
+                  style={[styles.albumCover, this._imageSize]}
+                />
+                <View style={styles.albumLabel}>
+                  <Text style={styles.primaryText}>{album.title}</Text>
+                  <Text style={styles.secondaryText}>{count}</Text>
+                </View>
               </View>
-            </View>
+            </TouchableWithoutFeedback>
           )
         })}
       </ScrollView>
     )
   }
 }
+
+AlbumsScreen.propTypes = propTypes
 
 const styles = StyleSheet.create({
   container: {

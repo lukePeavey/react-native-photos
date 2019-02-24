@@ -4,8 +4,10 @@ import {
   createAppContainer,
   createBottomTabNavigator,
 } from 'react-navigation'
+import { Platform } from 'react-native'
 import PhotosScreen from '@screens/PhotosScreen'
 import AlbumsScreen from '@screens/AlbumsScreen'
+import SingleAlbumScreen from '@screens/SingleAlbumScreen'
 import InfoScreen from '@screens/InfoScreen'
 import SlideShowScreen from '@screens/SlideShowScreen'
 import TabBarIcon from '@views/TabBarIcon'
@@ -16,6 +18,8 @@ import TabBarIcon from '@views/TabBarIcon'
 // - Each tab is a separate stack navigator with one or more screens.
 
 const navigationOptions = {
+  headerTransitionPreset: 'uikit',
+  headerMode: 'float',
   defaultNavigationOptions: {
     headerStyle: {
       backgroundColor: 'rgba(249, 249, 249, 0.9)',
@@ -30,39 +34,22 @@ const navigationOptions = {
 */
 const PhotosStack = createStackNavigator(
   {
-    Photos: {
-      screen: PhotosScreen,
-      navigationOptions: {
-        title: 'Photos',
-      },
-    },
+    Photos: { screen: PhotosScreen },
   },
   navigationOptions
 )
 
 const AlbumsStack = createStackNavigator(
   {
-    Albums: {
-      screen: AlbumsScreen,
-      navigationOptions: {
-        ...navigationOptions,
-        title: 'My Albums',
-        backTitle: 'Albums',
-      },
-    },
+    Albums: { screen: AlbumsScreen },
+    SingleAlbum: { screen: SingleAlbumScreen },
   },
   navigationOptions
 )
 
 const InfoStack = createStackNavigator(
   {
-    Info: {
-      screen: InfoScreen,
-      navigationOptions: {
-        ...navigationOptions,
-        title: 'Info',
-      },
-    },
+    Info: { screen: InfoScreen },
   },
   navigationOptions
 )
