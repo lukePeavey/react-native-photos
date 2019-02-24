@@ -72,6 +72,7 @@ export default class SingleAlbum extends React.Component {
   _handlePressImage = (image, index) => {
     const { navigation } = this.props
     navigation.navigate('SlideShow', {
+      albumID: navigation.getParam('id'),
       initialIndex: index,
       isFullscreen: true,
       image,
