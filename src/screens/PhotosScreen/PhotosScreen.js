@@ -10,6 +10,7 @@ import {
 } from 'react-native'
 import PropTypes from 'prop-types'
 import imageURI from '@utils/imageURI'
+import { PhotoPropType, ScreenPropType, NavigationPropType } from '../../types'
 
 const IS_TABLET = Platform.OS === 'ios' && Platform.isPad
 const GUTTERS = IS_TABLET ? 16 : 2
@@ -18,22 +19,15 @@ const RESIZE_MODE = IS_TABLET ? 'contain' : 'cover'
 
 const propTypes = {
   /** React navigation prop */
-  navigation: PropTypes.shape({
-    navigate: PropTypes.func.isRequired,
-  }).isRequired,
+  navigation: NavigationPropType.isRequired,
   /** Screen dimensions */
-  screen: PropTypes.shape({
-    width: PropTypes.number.isRequired,
-    height: PropTypes.number.isRequired,
-    isLandscape: PropTypes.bool.isRequired,
-  }).isRequired,
+  screen: ScreenPropType.isRequired,
   /** Array of image collections */
   collections: PropTypes.arrayOf(
     PropTypes.shape({
-      location: PropTypes.string,
-      date: PropTypes.string,
-      id: PropTypes.string,
-      photos: PropTypes.array,
+      location: PropTypes.string.isRequired,
+      date: PropTypes.string.isRequired,
+      images: PropTypes.arrayOf(PhotoPropType),
     })
   ),
 }

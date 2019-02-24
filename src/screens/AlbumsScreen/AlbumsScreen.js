@@ -10,32 +10,18 @@ import {
 } from 'react-native'
 import PropTypes from 'prop-types'
 import imageURI from '@utils/imageURI'
+import { AlbumPropType, ScreenPropType, NavigationPropType } from '../../types'
 
 const SPACING = 24
 const ASPECT_RATIO = 1
 
 const propTypes = {
   /** React navigation prop */
-  navigation: PropTypes.shape({
-    navigate: PropTypes.func.isRequired,
-  }).isRequired,
+  navigation: NavigationPropType.isRequired,
   /** Screen dimensions  */
-  screen: PropTypes.shape({
-    width: PropTypes.number.isRequired,
-    height: PropTypes.number.isRequired,
-    isLandscape: PropTypes.bool.isRequired,
-  }).isRequired,
+  screen: ScreenPropType.isRequired,
   /** Array of albums  */
-  albums: PropTypes.arrayOf(
-    PropTypes.shape({
-      title: PropTypes.string.isRequired,
-      id: PropTypes.string.isRequired,
-      count: PropTypes.number.isRequired,
-      coverImage: PropTypes.shape({
-        id: PropTypes.string.isRequired,
-      }).isRequired,
-    })
-  ).isRequired,
+  albums: PropTypes.arrayOf(AlbumPropType).isRequired,
 }
 
 /**

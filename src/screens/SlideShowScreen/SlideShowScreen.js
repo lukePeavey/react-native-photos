@@ -7,26 +7,15 @@ import {
   FlatList,
   TouchableWithoutFeedback,
 } from 'react-native'
+import { PhotoPropType, ScreenPropType, NavigationPropType } from '../../types'
 
 const propTypes = {
   /** Screen dimensions */
-  screen: PropTypes.shape({
-    width: PropTypes.number.isRequired,
-    height: PropTypes.number.isRequired,
-    isLandscape: PropTypes.bool.isRequired,
-  }).isRequired,
+  screen: ScreenPropType.isRequired,
   /** The array of images to display  */
-  images: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      bucket: PropTypes.string.isRequired,
-    })
-  ).isRequired,
+  images: PropTypes.arrayOf(PhotoPropType).isRequired,
   /** React navigation prop */
-  navigation: PropTypes.shape({
-    navigate: PropTypes.func.isRequired,
-    getParam: PropTypes.func.isRequired,
-  }).isRequired,
+  navigation: NavigationPropType.isRequired,
 }
 
 export default class PhotoViewer extends React.PureComponent {

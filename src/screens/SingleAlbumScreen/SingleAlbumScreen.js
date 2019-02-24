@@ -11,24 +11,15 @@ import {
 } from 'react-native'
 import PropTypes from 'prop-types'
 import imageURI from '@utils/imageURI'
+import { PhotoPropType, ScreenPropType, NavigationPropType } from '../../types'
 
 const propTypes = {
   /** React navigation prop */
-  navigation: PropTypes.shape({
-    navigate: PropTypes.func.isRequired,
-  }).isRequired,
+  navigation: NavigationPropType.isRequired,
   /** Screen dimensions  */
-  screen: PropTypes.shape({
-    width: PropTypes.number.isRequired,
-    height: PropTypes.number.isRequired,
-    isLandscape: PropTypes.bool.isRequired,
-  }).isRequired,
+  screen: ScreenPropType.isRequired,
   /** Array of images */
-  images: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-    })
-  ).isRequired,
+  images: PropTypes.arrayOf(PhotoPropType).isRequired,
 }
 
 const IS_TABLET = Platform.OS === 'ios' && Platform.isPad
