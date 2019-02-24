@@ -60,16 +60,27 @@ export const selectors = {
     }))
   },
 
+  getPhotosByAlbum(state, albumID) {
+    if (albumID === 'camera-roll') {
+      return Object.values(state.photos.images)
+    }
+    const album = state.photos.albums.find(item => item.id === albumID)
+    return album.imageIDs.map(id => state.photos.images[id])
+  },
+
   getAlbums(state) {
     return state.photos.albums.map(album => {
-      const isCameralRoll = album.id === 'camera-roll'
-      const images = isCameralRoll
-        ? Object.values(state.photos.images)
-        : album.images.map(id => state.photos.images[id])
+      let { coverImage, imageIDs } = album
+      if (album.id === 'camera-roll') {
+        imageIDs = Object.keys(state.photos.images)
+        /* eslint-disable-next-line prefer-destructuring */
+        coverImage = imageIDs[0]
+      }
       return {
-        ...album,
-        images,
-        coverImage: images[0],
+        title: album.title,
+        id: album.id,
+        count: imageIDs.length || 0,
+        coverImage: state.photos.images[coverImage],
       }
     })
   },
