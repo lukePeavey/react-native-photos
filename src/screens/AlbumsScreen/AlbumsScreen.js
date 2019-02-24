@@ -1,23 +1,83 @@
 /* eslint-disable no-unused-vars */
 import React from 'react'
-import { View, Text, StyleSheet } from 'react-native'
+import {
+  View,
+  ScrollView,
+  StyleSheet,
+  Text,
+  Image,
+  TouchableWithoutFeedback,
+  Platform,
+} from 'react-native'
 import PropTypes from 'prop-types'
+import imageURI from '@utils/imageURI'
 
-const propTypes = {}
-const defaultProps = {}
+const SPACING = 24
+const ASPECT_RATIO = 1
+
+const propTypes = {
+  /** React navigation prop */
+  navigation: PropTypes.shape({
+    navigate: PropTypes.func.isRequired,
+  }).isRequired,
+  /** Screen dimensions  */
+  screen: PropTypes.shape({
+    width: PropTypes.number.isRequired,
+    height: PropTypes.number.isRequired,
+    isLandscape: PropTypes.bool.isRequired,
+  }).isRequired,
+  /** Array of albums  */
+  albums: PropTypes.arrayOf(
+    PropTypes.shape({
+      title: PropTypes.string.isRequired,
+      id: PropTypes.string.isRequired,
+      count: PropTypes.number.isRequired,
+      coverImage: PropTypes.shape({
+        id: PropTypes.string.isRequired,
+      }).isRequired,
+    })
+  ).isRequired,
+}
 
 /**
  * This screen displays a list of the user's albums.
  */
 export default class MyAlbums extends React.Component {
-  state = {}
+  static propTypes = propTypes
+
+  get _columns() {
+    const { screen } = this.props
+    if (screen.width > 414) return 4
+    return 2
+  }
+
+  get _imageSize() {
+    const { screen } = this.props
+    const width = (screen.width - SPACING * (this._columns + 1)) / this._columns
+    return { width, height: width * ASPECT_RATIO }
+  }
 
   render() {
+    const { albums } = this.props
     return (
-      <View style={styles.container}>
-        <Text>Albums Screen</Text>
-        <Text>This is a placeholder for the albums screen.</Text>
-      </View>
+      <ScrollView style={styles.container} contentContainerStyle={styles.grid}>
+        {albums.map(album => {
+          const { coverImage, count } = album
+          return (
+            <View style={[styles.gridItem]} key={album.id}>
+              <Image
+                source={{ uri: imageURI(coverImage.id, 200) }}
+                style={[styles.albumCover, this._imageSize]}
+                resizeMode="cover"
+              />
+              <View style={styles.albumLabel}>
+                <Text style={styles.primaryText}>{album.title}</Text>
+                <Text style={styles.secondaryText}>{count}</Text>
+              </View>
+            </View>
+          )
+        })}
+      </ScrollView>
     )
   }
 }
@@ -25,7 +85,31 @@ export default class MyAlbums extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    padding: SPACING / 2,
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  gridItem: {
+    margin: SPACING / 2,
+    marginBottom: 16,
+    flexGrow: 0,
+    flexBasis: 'auto',
+  },
+  albumCover: {
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  albumLabel: {
+    paddingVertical: 8,
+  },
+  primaryText: {
+    color: 'rgba(0,0,0,0.9)',
+    fontWeight: '600',
+  },
+  secondaryText: {
+    color: 'rgba(0,0,0,0.37)',
+    fontWeight: '600',
   },
 })

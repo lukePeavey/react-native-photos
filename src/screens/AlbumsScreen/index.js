@@ -1,1 +1,1 @@
-export { default } from './AlbumsScreen'
+export { default } from './AlbumsScreenContainer'
