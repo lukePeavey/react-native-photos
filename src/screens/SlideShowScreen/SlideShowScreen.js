@@ -49,6 +49,15 @@ export default class PhotoViewer extends React.PureComponent {
     }
   }
 
+  _getResizeMode = image => {
+    const { screen } = this.props
+    if (screen.isLandscape) {
+      return image.aspectRatio > 1 ? 'contain' : 'cover'
+    } else {
+      return image.aspectRatio < 1 ? 'contain' : 'cover'
+    }
+  }
+
   _keyExtractor = item => item.id
 
   /** Used to determine the size of each item in the scrollView */
@@ -76,7 +85,7 @@ export default class PhotoViewer extends React.PureComponent {
           <Image
             source={{ uri: `${item.bucket}/${item.id}--1024.jpg` }}
             style={styles.image}
-            resizeMode="contain"
+            resizeMode={this._getResizeMode(item)}
           />
         </View>
       </TouchableWithoutFeedback>
