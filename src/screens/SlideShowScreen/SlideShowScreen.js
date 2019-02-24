@@ -6,7 +6,9 @@ import {
   StyleSheet,
   FlatList,
   TouchableWithoutFeedback,
+  StatusBar,
 } from 'react-native'
+import { NavigationEvents } from 'react-navigation'
 import { PhotoPropType, ScreenPropType, NavigationPropType } from '../../types'
 
 const propTypes = {
@@ -47,6 +49,14 @@ export default class PhotoViewer extends React.PureComponent {
         })
       }
     }
+  }
+
+  _onWillFocus = () => {
+    StatusBar.setHidden(true)
+  }
+
+  _onDidBlur = () => {
+    StatusBar.setHidden(this.props.screen.isLandscape)
   }
 
   _getResizeMode = image => {
@@ -93,10 +103,12 @@ export default class PhotoViewer extends React.PureComponent {
   }
 
   _toggleNavBar = () => {
-    const { navigation } = this.props
+    const { navigation, screen } = this.props
+    const isFullscreen = navigation.getParam('isFullscreen')
     navigation.setParams({
-      isFullscreen: !navigation.getParam('isFullscreen'),
+      isFullscreen: !isFullscreen,
     })
+    StatusBar.setHidden(screen.isLandscape || !isFullscreen)
   }
 
   render() {
@@ -104,20 +116,26 @@ export default class PhotoViewer extends React.PureComponent {
     const isFullscreen = navigation.getParam('isFullscreen')
     const backgroundColor = isFullscreen ? '#111' : '#fff'
     return (
-      <FlatList
-        data={images}
-        renderItem={this._renderItem}
-        style={[styles.container, { backgroundColor }]}
-        initialScrollIndex={this._index}
-        initialNumToRender={1}
-        onViewableItemsChanged={this._onViewableItemsChanged}
-        getItemLayout={this._getItemLayout}
-        pagingEnabled
-        removeClippedSubviews
-        horizontal
-        keyExtractor={this._keyExtractor}
-        ref={this._FlatList}
-      />
+      <React.Fragment>
+        <NavigationEvents
+          onWillFocus={this._onWillFocus}
+          onDidBlur={this._onDidBlur}
+        />
+        <FlatList
+          data={images}
+          renderItem={this._renderItem}
+          style={[styles.container, { backgroundColor }]}
+          initialScrollIndex={this._index}
+          initialNumToRender={1}
+          onViewableItemsChanged={this._onViewableItemsChanged}
+          getItemLayout={this._getItemLayout}
+          pagingEnabled
+          removeClippedSubviews
+          horizontal
+          keyExtractor={this._keyExtractor}
+          ref={this._FlatList}
+        />
+      </React.Fragment>
     )
   }
 }

@@ -1,13 +1,15 @@
 import React from 'react'
-import { Dimensions } from 'react-native'
+import { Dimensions, StatusBar } from 'react-native'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { ScreenOrientation } from 'expo'
-import { actions } from '@store'
+import { selectors, actions } from '@store'
 import AppNavigator from '@navigation/appNavigator'
+import { ScreenPropType } from './types'
 
 const propTypes = {
   dispatch: PropTypes.func.isRequired,
+  screen: ScreenPropType,
 }
 
 class App extends React.Component {
@@ -28,8 +30,17 @@ class App extends React.Component {
   }
 
   render() {
-    return <AppNavigator />
+    return (
+      <React.Fragment>
+        <StatusBar hidden={this.props.screen.isLandscape} />
+        <AppNavigator />
+      </React.Fragment>
+    )
   }
 }
 
-export default connect(null)(App)
+const mapStateToProps = state => ({
+  screen: selectors.ui.getScreen(state),
+})
+
+export default connect(mapStateToProps)(App)
