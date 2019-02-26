@@ -60,7 +60,7 @@ export default class PhotoViewer extends React.PureComponent {
     if (prevProps.screen.width !== this.props.screen.width) {
       // The scroll position needs to updated after orientation change...
       if (this._FlatList.current) {
-        this._FlatList.current.scrollToIndex({
+        this._FlatList.current.getNode().scrollToIndex({
           index: this._index,
           animated: false,
         })
