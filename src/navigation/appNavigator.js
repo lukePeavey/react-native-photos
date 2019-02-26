@@ -4,7 +4,7 @@ import {
   createAppContainer,
   createBottomTabNavigator,
 } from 'react-navigation'
-import { Platform } from 'react-native'
+import { StyleSheet } from 'react-native'
 import PhotosScreen from '@screens/PhotosScreen'
 import AlbumsScreen from '@screens/AlbumsScreen'
 import SingleAlbumScreen from '@screens/SingleAlbumScreen'
@@ -22,7 +22,9 @@ const navigationOptions = {
   headerMode: 'float',
   defaultNavigationOptions: {
     headerStyle: {
-      backgroundColor: 'rgba(249, 249, 249, 0.9)',
+      backgroundColor: 'rgba(249, 249, 249, 0.95)',
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: '#ccc',
     },
   },
 }

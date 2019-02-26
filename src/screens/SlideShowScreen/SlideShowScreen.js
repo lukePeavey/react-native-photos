@@ -9,6 +9,7 @@ import {
   StatusBar,
 } from 'react-native'
 import { NavigationEvents } from 'react-navigation'
+import imageURI from '@utils/imageURI'
 import { PhotoPropType, ScreenPropType, NavigationPropType } from '../../types'
 
 const propTypes = {
@@ -24,11 +25,11 @@ export default class PhotoViewer extends React.PureComponent {
   static propTypes = propTypes
 
   static navigationOptions = ({ navigation }) => {
-    const options = {}
+    // Hide the header in fullscreen mode
     if (navigation.getParam('isFullscreen')) {
-      options.header = null
+      return { header: null }
     }
-    return options
+    return {}
   }
 
   // Keep track of the active image index. This is not stored in state
@@ -37,6 +38,12 @@ export default class PhotoViewer extends React.PureComponent {
 
   // Reference to the FlatList instance
   _FlatList = React.createRef()
+
+  // Determines when the viewable item changes
+  _viewabilityConfig = {
+    itemVisiblePercentThreshold: 50,
+    minimumViewTime: 1,
+  }
 
   componentDidUpdate = prevProps => {
     // After screen orientation changes...
@@ -51,14 +58,41 @@ export default class PhotoViewer extends React.PureComponent {
     }
   }
 
-  _onWillFocus = () => {
-    StatusBar.setHidden(true)
+  /** Navigation event */
+  componentWillFocus = () => {
+    // Hide the status bar when navigating to this screen if fullscreen mode
+    // is enabled
+    StatusBar.setHidden(this.props.navigation.getParam('isFullscreen'), 'fade')
   }
 
-  _onDidBlur = () => {
-    StatusBar.setHidden(this.props.screen.isLandscape)
+  /** Navigation event */
+  componentWillBlur = () => {
+    // Un-hide the status bar when leaving this screen
+    StatusBar.setHidden(this.props.screen.isLandscape, 'fade')
   }
 
+  /**
+   * Toggles fullscreen mode
+   *
+   * In fullscreen mode: the navigation bar and status bar are hidden, and the
+   * ~screen background color changes from white to black~
+   *
+   * @TODO Find a way to change background color of the RootView. Otherwise
+   * white edges are visible when changing device orientation. For now just
+   * leave background white in fullscreen.
+   * @TODO when switching in/out of fullscreen mode, the header/status bar
+   * should fade in/out.
+   */
+  _toggleFullScreen = () => {
+    const { navigation, screen } = this.props
+    const isFullscreen = navigation.getParam('isFullscreen')
+    navigation.setParams({
+      isFullscreen: !isFullscreen,
+    })
+    StatusBar.setHidden(screen.isLandscape || !isFullscreen)
+  }
+
+  // Determines which resize mode to use for images
   _getResizeMode = image => {
     const { screen } = this.props
     if (screen.isLandscape) {
@@ -90,10 +124,10 @@ export default class PhotoViewer extends React.PureComponent {
 
   _renderItem = ({ item }) => {
     return (
-      <TouchableWithoutFeedback onPress={this._toggleNavBar}>
+      <TouchableWithoutFeedback onPress={this._toggleFullScreen}>
         <View style={[styles.item, this.props.screen]}>
           <Image
-            source={{ uri: `${item.bucket}/${item.id}--1024.jpg` }}
+            source={{ uri: imageURI(item.id, 800) }}
             style={styles.image}
             resizeMode={this._getResizeMode(item)}
           />
@@ -102,35 +136,25 @@ export default class PhotoViewer extends React.PureComponent {
     )
   }
 
-  _toggleNavBar = () => {
-    const { navigation, screen } = this.props
-    const isFullscreen = navigation.getParam('isFullscreen')
-    navigation.setParams({
-      isFullscreen: !isFullscreen,
-    })
-    StatusBar.setHidden(screen.isLandscape || !isFullscreen)
-  }
-
   render() {
     const { images, navigation } = this.props
-    const isFullscreen = navigation.getParam('isFullscreen')
-    const backgroundColor = isFullscreen ? '#111' : '#fff'
     return (
       <React.Fragment>
         <NavigationEvents
-          onWillFocus={this._onWillFocus}
-          onDidBlur={this._onDidBlur}
+          onWillFocus={this.componentWillFocus}
+          onWillBlur={this.componentWillBlur}
         />
         <FlatList
           data={images}
           renderItem={this._renderItem}
-          style={[styles.container, { backgroundColor }]}
+          style={styles.container}
           initialScrollIndex={this._index}
           initialNumToRender={1}
           onViewableItemsChanged={this._onViewableItemsChanged}
           getItemLayout={this._getItemLayout}
           pagingEnabled
           removeClippedSubviews
+          viewabilityConfig={this._viewabilityConfig}
           horizontal
           keyExtractor={this._keyExtractor}
           ref={this._FlatList}
@@ -145,11 +169,11 @@ PhotoViewer.propTypes = propTypes
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    position: 'relative',
-    overflow: 'hidden',
     padding: 0,
+    backgroundColor: '#FFF',
   },
   item: {
+    overflow: 'hidden',
     backgroundColor: 'transparent',
     flexGrow: 0,
     alignItems: 'center',

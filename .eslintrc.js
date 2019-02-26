@@ -36,6 +36,7 @@ module.exports = {
     'class-methods-use-this': 'off',
     'arrow-parens': 'off',
     'no-else-return': 'off',
+    'no-unused-vars': 'off',
     'no-console': 'off', // @FIXME turn this back on later
   },
   globals: {
