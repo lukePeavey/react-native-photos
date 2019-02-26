@@ -1,8 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import {
-  View,
-  Image,
+  Animated,
   StyleSheet,
   FlatList,
   TouchableWithoutFeedback,
@@ -20,6 +19,8 @@ const propTypes = {
   /** React navigation prop */
   navigation: NavigationPropType.isRequired,
 }
+
+const AnimatedFlatList = Animated.createAnimatedComponent(FlatList)
 
 export default class PhotoViewer extends React.PureComponent {
   static propTypes = propTypes
@@ -44,6 +45,15 @@ export default class PhotoViewer extends React.PureComponent {
     itemVisiblePercentThreshold: 50,
     minimumViewTime: 1,
   }
+
+  // Animated scroll value
+  _animatedScroll = new Animated.Value(0)
+
+  // Pipe the scroll position to `this._animatedScroll`
+  _onScroll = Animated.event(
+    [{ nativeEvent: { contentOffset: { x: this._animatedScroll } } }],
+    { useNativeDriver: true }
+  )
 
   componentDidUpdate = prevProps => {
     // After screen orientation changes...
@@ -122,29 +132,88 @@ export default class PhotoViewer extends React.PureComponent {
     }
   }
 
-  _renderItem = ({ item }) => {
+  /**
+   * Returns an interpolated scroll offset value for each item.
+   * The output range is `[-1, 0, 1]`.
+   */
+  _getInterpolatePosition = index => {
+    const { images, screen } = this.props
+    // Input range is calculated based on index
+    const inputRange = [
+      (index - 1) * screen.width,
+      index * screen.width,
+      (index + 1) * screen.width,
+    ]
+    // Output range for all images except first and last
+    let outputRange = [-1, 0, 1]
+    // Output range for the FIRST image in the slider
+    if (index === 0) outputRange = [0, 0, 1]
+    // Output range for the LAST image in the slider
+    if (index === images.length - 1) outputRange = [-1, 0, 0]
+
+    // Return the interpolated value
+    return this._animatedScroll.interpolate({
+      inputRange,
+      outputRange,
+      extrapolate: 'clamp',
+    })
+  }
+
+  /**
+   * Renders each item in the slider
+   */
+  _renderItem = ({ item, index }) => {
+    const { screen } = this.props
+    const position = this._getInterpolatePosition(index)
+
+    // Animation styles applied to the outer `<View />`:
+    // The scaleX creates a space between images that is only visible when
+    // scrolling. The current image always fills the full width of the screen
+    // while the images to the right and left are scaled down.
+    const scaleX = position.interpolate({
+      inputRange: [-1, 0, 1],
+      outputRange: [0.95, 1, 0.95],
+    })
+    const viewStyles = {
+      height: screen.height,
+      width: screen.width,
+      transform: [{ scaleX }],
+    }
+
+    // Animation styles applied to the `<Image />`:
+    const translateX = position.interpolate({
+      inputRange: [-1, 0, 1],
+      outputRange: [-150, 0, 150],
+      extrapolate: 'clamp',
+    })
+    // The image is translated along X axis as it is swiped right or left to
+    // create a subtle  parallax effect.
+    const imageStyles = {
+      transform: [{ translateX }],
+    }
+
     return (
       <TouchableWithoutFeedback onPress={this._toggleFullScreen}>
-        <View style={[styles.item, this.props.screen]}>
-          <Image
+        <Animated.View style={[styles.item, viewStyles]}>
+          <Animated.Image
             source={{ uri: imageURI(item.id, 800) }}
-            style={styles.image}
+            style={[styles.image, imageStyles]}
             resizeMode={this._getResizeMode(item)}
           />
-        </View>
+        </Animated.View>
       </TouchableWithoutFeedback>
     )
   }
 
   render() {
-    const { images, navigation } = this.props
+    const { images } = this.props
     return (
       <React.Fragment>
         <NavigationEvents
           onWillFocus={this.componentWillFocus}
           onWillBlur={this.componentWillBlur}
         />
-        <FlatList
+        <AnimatedFlatList
           data={images}
           renderItem={this._renderItem}
           style={styles.container}
@@ -158,6 +227,8 @@ export default class PhotoViewer extends React.PureComponent {
           horizontal
           keyExtractor={this._keyExtractor}
           ref={this._FlatList}
+          scrollEventThrottle={16}
+          onScroll={this._onScroll}
         />
       </React.Fragment>
     )
