@@ -1,4 +1,6 @@
+/* eslint-disable no-plusplus */
 import console from '@utils/console'
+import { stringifyLocation, reverseGeocode } from '@utils/geocode'
 /**
 |--------------------------------------------------
 | actions
@@ -6,6 +8,7 @@ import console from '@utils/console'
 */
 export const actionTypes = {
   SAVE_PHOTOS: 'SAVE_PHOTOS',
+  SAVE_GEOLOCATIONS: 'SAVE_GEOLOCATIONS',
 }
 
 export const actions = {
@@ -14,6 +17,43 @@ export const actions = {
     type: actionTypes.SAVE_PHOTOS,
     payload: photos,
   }),
+  saveGeolocationData: geolocations => ({
+    type: actionTypes.SAVE_GEOLOCATIONS,
+    payload: geolocations,
+  }),
+  reverseGeocodeImageLocations() {
+    return (dispatch, getState) => {
+      const { photos, geolocations } = getState().photos
+      let idx = 0
+      // We need to make a separate API request for each location.
+      // Requests have to be rate limited to avoid exceeding the max
+      // number of requests per second.  The promise will resolve once
+      // all of the API calls have completed.
+      return Promise.all(
+        // Iterate through the photos in state...
+        Object.values(photos).map(item => {
+          const LATITUDE_LONGITUDE = stringifyLocation(item.location)
+          // Check if the location for this image has already been cached
+          if (!LATITUDE_LONGITUDE || geolocations[item.id]) {
+            return null
+          } else {
+            // limit request rate to 49 requests every 2 seconds
+            const timeout = Math.floor(idx++ / 49) * 2000
+            // Send a reverse-geocode request to the Google Maps API.
+            // Converts the latitude,longitude to an human readable address.
+            // Returns an array `[LATITUDE_LONGITUDE, Address || null]`
+            return reverseGeocode(item, timeout)
+          }
+        })
+      )
+        .then(data => {
+          dispatch(this.saveGeolocationData(data.filter(el => el)))
+        })
+        .catch(error => {
+          console.error('[getGeolocationData]', error)
+        })
+    }
+  },
 }
 
 /**
@@ -22,7 +62,9 @@ export const actions = {
 |--------------------------------------------------
 */
 export const initialState = {
-  photos: [],
+  isFinishedGeocoding: false,
+  geolocations: {},
+  photos: {},
   albums: [{ name: 'Camera Roll' }],
 }
 
@@ -34,6 +76,19 @@ export default function photosReducer(state = initialState, action) {
   switch (action.type) {
     case actionTypes.SAVE_PHOTOS: {
       return { ...state, photos: action.payload }
+    }
+    case actionTypes.SAVE_GEOLOCATIONS: {
+      // Converts the 2d array geolocations returned by `getGeolocationData`
+      // to an object map where keys are `longitude,latitude` string
+      // and value
+      const geolocations = action.payload.reduce((result, [key, value]) => {
+        return { ...result, [key]: value }
+      }, {})
+      return {
+        ...state,
+        geolocations: { ...state.geolocations, ...geolocations },
+        isFinishedGeocoding: true,
+      }
     }
     default: {
       return state
@@ -49,21 +104,31 @@ export default function photosReducer(state = initialState, action) {
 export const selectors = {
   /** Get all photos (sorted by timestamp in descending order) */
   getPhotos(state) {
-    return Object.values(state.photos.photos).sort(
-      (a, b) => a.timestamp - b.timestamp
-    )
+    return Object.values(state.photos.photos)
+      .sort((a, b) => a.timestamp - b.timestamp)
+      .map(item => ({
+        ...item,
+        address: state.photos.geolocations[item.id],
+      }))
   },
 
   /** Get all photos to display on the "My Photos" screen */
   getPhotoByID(state, id) {
-    return state.photos.photos[id]
+    const photo = state.photos.photos[id]
+    return { ...photo, location: state.photos.geolocations[photo.id] }
+  },
+
+  getPhotoGeolocation(state, photoID) {
+    const photo = state.photos.photos[photoID]
+    const location = photo && stringifyLocation(photo.location)
+    return (location && state.photos.geolocations[location]) || null
   },
 
   /**
    * Get the list of albums to display on "Albums" screen
    */
   getAlbums(state) {
-    const photos = this.getPhotos(state)
+    const photos = Object.values(state.photos.photos)
     return state.photos.albums.map(album => {
       if (album.name === 'Camera Roll') {
         return {
@@ -95,7 +160,10 @@ export const selectors = {
     const photos = this.getPhotos(state)
     // The Camera Roll album is all photos in the library
     if (albumName === 'Camera Roll') {
-      return photos
+      return photos.map(item => ({
+        ...item,
+        address: state.photos.geolocations[item.id],
+      }))
     } else {
       // Other albums have an array of image IDs.
       // First get the album object which has an array of image IDs.
@@ -106,8 +174,12 @@ export const selectors = {
           '[selectors.getPhotosByAlbum]',
           `The album name "${albumName}" does not exist`
         )
+        return []
       }
-      return album ? album.imageIDs.map(id => photos[id]) : []
+      return album.imageIDs.map(id => ({
+        ...photos[id],
+        address: state.photos.geolocations[id],
+      }))
     }
   },
 }

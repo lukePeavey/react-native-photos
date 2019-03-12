@@ -11,3 +11,6 @@ yarn.lock
 data/
 private/
 
+# this file contains api keys 
+secret.js
+

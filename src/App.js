@@ -36,6 +36,7 @@ class App extends React.Component {
    * Get data from the devices cameral roll and store it an application state
    */
   _getPhotosFromCameraRoll = async () => {
+    const { dispatch } = this.props
     try {
       // Request permission to access cameral roll.
       const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL)
@@ -58,7 +59,8 @@ class App extends React.Component {
           return { ...ret, [item.id]: item }
         }, {})
         // Save photos to redux state
-        this.props.dispatch(actions.photos.savePhotos(photos))
+        dispatch(actions.photos.savePhotos(photos))
+        dispatch(actions.photos.reverseGeocodeImageLocations())
       }
     } catch (error) {
       console.error('[getPhotosFromCameraRoll]', error)
