@@ -8,9 +8,9 @@ const mapStateToProps = (state, props) => {
   // slider should only contain images in that album. If there is no `albumID`,
   // the user navigated to the image slider from the Photos screen, so the
   // slider should include all images (aka 'cameral-roll').
-  const albumID = props.navigation.getParam('albumID') || 'camera-roll'
+  const albumName = props.navigation.getParam('albumName', 'Camera Roll')
   return {
-    images: selectors.photos.getPhotosByAlbum(state, albumID),
+    images: selectors.photos.getPhotosByAlbum(state, albumName),
     screen: selectors.ui.getScreen(state),
   }
 }

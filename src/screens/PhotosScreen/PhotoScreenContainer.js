@@ -3,7 +3,7 @@ import { selectors } from '@store'
 import PhotoScreen from './PhotosScreen'
 
 const mapStateToProps = state => ({
-  collections: selectors.photos.getCollections(state),
+  photos: selectors.photos.getPhotos(state),
   screen: selectors.ui.getScreen(state),
 })
 

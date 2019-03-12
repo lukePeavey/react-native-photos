@@ -1,15 +1,14 @@
 import React from 'react'
 import {
   View,
-  Image,
   Text,
   StyleSheet,
   ScrollView,
   Platform,
   TouchableWithoutFeedback,
+  Image,
 } from 'react-native'
 import PropTypes from 'prop-types'
-import imageURI from '@utils/imageURI'
 import { PhotoPropType, ScreenPropType, NavigationPropType } from '../../types'
 
 const IS_TABLET = Platform.OS === 'ios' && Platform.isPad
@@ -23,13 +22,7 @@ const propTypes = {
   /** Screen dimensions */
   screen: ScreenPropType.isRequired,
   /** Array of image collections */
-  collections: PropTypes.arrayOf(
-    PropTypes.shape({
-      location: PropTypes.string.isRequired,
-      date: PropTypes.string.isRequired,
-      images: PropTypes.arrayOf(PhotoPropType),
-    })
-  ),
+  photos: PropTypes.arrayOf(PhotoPropType).isRequired,
 }
 
 /**
@@ -88,9 +81,9 @@ export default class PhotosScreen extends React.Component {
         onPress={() => this._handlePressImage(item, index)}
         key={item.id}
       >
-        <View style={[styles.item, this._imageSize]} key={item.id}>
+        <View style={[styles.item, this._imageSize]}>
           <Image
-            source={{ uri: imageURI(item.id, 200) }}
+            source={{ uri: item.image.uri }}
             style={styles.image}
             resizeMode={RESIZE_MODE}
           />
@@ -100,20 +93,10 @@ export default class PhotosScreen extends React.Component {
   }
 
   render() {
-    const { collections } = this.props
-    // Images are grouped into collections. `itemIndex` is the index relative
-    // to all images. This value is passed to `this._renderItem`
-    let itemIndex = -1
+    const { photos } = this.props
     return (
-      <ScrollView style={styles.container}>
-        {collections.map(collection => (
-          <View style={styles.grid} key={collection.id}>
-            {this._renderSectionHeader(collection)}
-            {collection.images.map(image =>
-              this._renderItem(image, (itemIndex += 1))
-            )}
-          </View>
-        ))}
+      <ScrollView style={styles.container} contentContainerStyle={styles.grid}>
+        {photos.map((item, index) => this._renderItem(item, index))}
       </ScrollView>
     )
   }

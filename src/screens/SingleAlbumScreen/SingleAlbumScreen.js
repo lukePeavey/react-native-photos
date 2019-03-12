@@ -2,15 +2,14 @@
 import React from 'react'
 import {
   View,
-  Image,
   Text,
   StyleSheet,
   ScrollView,
+  Image,
   Platform,
   TouchableWithoutFeedback,
 } from 'react-native'
 import PropTypes from 'prop-types'
-import imageURI from '@utils/imageURI'
 import { PhotoPropType, ScreenPropType, NavigationPropType } from '../../types'
 
 const propTypes = {
@@ -40,7 +39,7 @@ const RESIZE_MODE = IS_TABLET ? 'contain' : 'cover'
  */
 export default class SingleAlbum extends React.Component {
   static navigationOptions = ({ navigation }) => ({
-    title: navigation.getParam('title'),
+    title: navigation.getParam('albumName'),
   })
 
   /** The number of columns in the image grid */
@@ -63,7 +62,7 @@ export default class SingleAlbum extends React.Component {
   _handlePressImage = (image, index) => {
     const { navigation } = this.props
     navigation.navigate('SlideShow', {
-      albumID: navigation.getParam('id'),
+      albumName: navigation.getParam('albumName'),
       initialIndex: index,
       isFullscreen: true,
       image,
@@ -91,7 +90,7 @@ export default class SingleAlbum extends React.Component {
       >
         <View style={[styles.item, this._imageSize]} key={item.id}>
           <Image
-            source={{ uri: imageURI(item.id, 200) }}
+            source={{ uri: item.image.uri }}
             style={styles.image}
             resizeMode={RESIZE_MODE}
           />

@@ -1,14 +1,19 @@
-import _images from '@data/images.json'
-import _collections from '@data/collections.json'
-import _albums from '@data/albums.json'
-
 /**
 |--------------------------------------------------
 | actions
 |--------------------------------------------------
 */
-export const actionTypes = {}
-export const actions = {}
+export const actionTypes = {
+  SAVE_PHOTOS: 'SAVE_PHOTOS',
+}
+
+export const actions = {
+  /** Saves data from the devices cameral roll to redux state */
+  savePhotos: photos => ({
+    type: actionTypes.SAVE_PHOTOS,
+    payload: photos,
+  }),
+}
 
 /**
 |--------------------------------------------------
@@ -16,13 +21,19 @@ export const actions = {}
 |--------------------------------------------------
 */
 export const initialState = {
-  images: _images,
-  collections: _collections,
-  albums: _albums,
+  photos: [],
+  albums: [{ name: 'Camera Roll' }],
 }
 
+/**
+ * Manages photos state
+ * @TODO normalize photo data from camera roll
+ */
 export default function photosReducer(state = initialState, action) {
   switch (action.type) {
+    case actionTypes.SAVE_PHOTOS: {
+      return { ...state, photos: action.payload }
+    }
     default: {
       return state
     }
@@ -35,53 +46,64 @@ export default function photosReducer(state = initialState, action) {
 |--------------------------------------------------
 */
 export const selectors = {
-  /** Get all photos */
+  /** Get all photos (sorted by timestamp in descending order) */
   getPhotos(state) {
-    return Object.values(state.photos.images)
-  },
-
-  /** Get single photo by ID */
-  getPhotoById(state, id) {
-    return state.photos.images.find(image => image.id === id)
-  },
-
-  /** Gets the photos from a given collection by ID */
-  getPhotosByCollection(state, collectionID) {
-    return Object.values(state.photos.images).filter(
-      image => image.collection === collectionID
+    return Object.values(state.photos.photos).sort(
+      (a, b) => a.timestamp - b.timestamp
     )
   },
 
-  /** Returns an array of "collections" */
-  getCollections(state) {
-    return state.photos.collections.map(collection => ({
-      ...collection,
-      images: this.getPhotosByCollection(state, collection.id),
-    }))
+  /** Get all photos to display on the "My Photos" screen */
+  getPhotoByID(state, id) {
+    return state.photos.photos[id]
   },
 
-  getPhotosByAlbum(state, albumID) {
-    if (albumID === 'camera-roll') {
-      return Object.values(state.photos.images)
-    }
-    const album = state.photos.albums.find(item => item.id === albumID)
-    return album.imageIDs.map(id => state.photos.images[id])
-  },
-
+  /**
+   * Get the list of albums to display on "Albums" screen
+   */
   getAlbums(state) {
+    const photos = this.getPhotos(state)
     return state.photos.albums.map(album => {
-      let { coverImage, imageIDs } = album
-      if (album.id === 'camera-roll') {
-        imageIDs = Object.keys(state.photos.images)
-        /* eslint-disable-next-line prefer-destructuring */
-        coverImage = imageIDs[0]
-      }
-      return {
-        title: album.title,
-        id: album.id,
-        count: imageIDs.length || 0,
-        coverImage: state.photos.images[coverImage],
+      if (album.name === 'Camera Roll') {
+        return {
+          ...album,
+          coverImage: photos[0],
+          count: photos.length,
+        }
+      } else {
+        return {
+          ...album,
+          coverImage: this.getPhotoByID(state, album.imageIDs[0]),
+          count: album.imageIDs.length,
+        }
       }
     })
+  },
+
+  /**
+   * Get an album object by album name
+   */
+  getAlbumByName(state, name) {
+    return state.photos.albums.find(item => item.name === name)
+  },
+
+  /**
+   * Get the photos in a given album
+   */
+  getPhotosByAlbum(state, albumName) {
+    const photos = this.getPhotos(state)
+    // The Camera Roll album is all photos in the library
+    if (albumName === 'Camera Roll') {
+      return photos
+    } else {
+      // Other albums have an array of image IDs.
+      // First get the album object which has an array of image IDs.
+      // Then map the image IDs to an array of actual image objects
+      const album = this.getAlbumByName(state, albumName)
+      if (__DEV__ && album === null) {
+        console.warn(`[getPhotosByAlbum] invalid album name: "${albumName}"`)
+      }
+      return album ? album.imageIDs.map(id => photos[id]) : []
+    }
   },
 }

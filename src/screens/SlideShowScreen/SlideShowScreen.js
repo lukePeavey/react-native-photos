@@ -8,7 +8,6 @@ import {
   StatusBar,
 } from 'react-native'
 import { NavigationEvents } from 'react-navigation'
-import imageURI from '@utils/imageURI'
 import { PhotoPropType, ScreenPropType, NavigationPropType } from '../../types'
 
 const propTypes = {
@@ -106,9 +105,9 @@ export default class PhotoViewer extends React.PureComponent {
   _getResizeMode = image => {
     const { screen } = this.props
     if (screen.isLandscape) {
-      return image.aspectRatio > 1 ? 'contain' : 'cover'
+      return image.height / image.width > 1 ? 'contain' : 'cover'
     } else {
-      return image.aspectRatio < 1 ? 'contain' : 'cover'
+      return image.height / image.width < 1 ? 'contain' : 'cover'
     }
   }
 
@@ -196,9 +195,9 @@ export default class PhotoViewer extends React.PureComponent {
       <TouchableWithoutFeedback onPress={this._toggleFullScreen}>
         <Animated.View style={[styles.item, viewStyles]}>
           <Animated.Image
-            source={{ uri: imageURI(item.id, 800) }}
+            source={{ uri: item.image.uri }}
             style={[styles.image, imageStyles]}
-            resizeMode={this._getResizeMode(item)}
+            resizeMode={this._getResizeMode(item.image)}
           />
         </Animated.View>
       </TouchableWithoutFeedback>

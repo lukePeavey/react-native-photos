@@ -9,7 +9,6 @@ import {
   TouchableWithoutFeedback,
 } from 'react-native'
 import PropTypes from 'prop-types'
-import imageURI from '@utils/imageURI'
 import { AlbumPropType, ScreenPropType, NavigationPropType } from '../../types'
 
 const SPACING = 24
@@ -48,8 +47,7 @@ export default class AlbumsScreen extends React.Component {
   _handlePress = album => () => {
     const { navigation } = this.props
     navigation.navigate('SingleAlbum', {
-      title: album.title,
-      id: album.id,
+      albumName: album.name,
     })
   }
 
@@ -62,15 +60,15 @@ export default class AlbumsScreen extends React.Component {
           return (
             <TouchableWithoutFeedback
               onPress={this._handlePress(album)}
-              key={album.id}
+              key={album.name}
             >
               <View style={[styles.gridItem]}>
                 <Image
-                  source={{ uri: imageURI(coverImage.id, 200) }}
+                  source={{ uri: coverImage.image.uri }}
                   style={[styles.albumCover, this._imageSize]}
                 />
                 <View style={styles.albumLabel}>
-                  <Text style={styles.primaryText}>{album.title}</Text>
+                  <Text style={styles.primaryText}>{album.name}</Text>
                   <Text style={styles.secondaryText}>{count}</Text>
                 </View>
               </View>
@@ -104,11 +102,13 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   albumLabel: {
+    flexDirection: 'row',
     paddingVertical: 8,
   },
   primaryText: {
     color: 'rgba(0,0,0,0.9)',
     fontWeight: '600',
+    marginRight: 'auto',
   },
   secondaryText: {
     color: 'rgba(0,0,0,0.37)',

@@ -3,9 +3,9 @@ import { selectors } from '@store'
 import SingleAlbumScreen from './SingleAlbumScreen'
 
 const mapStateToProps = (state, props) => {
-  const albumID = props.navigation.getParam('id')
+  const albumName = props.navigation.getParam('albumName')
   return {
-    images: selectors.photos.getPhotosByAlbum(state, albumID),
+    images: selectors.photos.getPhotosByAlbum(state, albumName),
     screen: selectors.ui.getScreen(state),
   }
 }
