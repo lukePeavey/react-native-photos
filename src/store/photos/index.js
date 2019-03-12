@@ -1,3 +1,4 @@
+import console from '@utils/console'
 /**
 |--------------------------------------------------
 | actions
@@ -100,8 +101,11 @@ export const selectors = {
       // First get the album object which has an array of image IDs.
       // Then map the image IDs to an array of actual image objects
       const album = this.getAlbumByName(state, albumName)
-      if (__DEV__ && album === null) {
-        console.warn(`[getPhotosByAlbum] invalid album name: "${albumName}"`)
+      if (album == null) {
+        console.warn(
+          '[selectors.getPhotosByAlbum]',
+          `The album name "${albumName}" does not exist`
+        )
       }
       return album ? album.imageIDs.map(id => photos[id]) : []
     }

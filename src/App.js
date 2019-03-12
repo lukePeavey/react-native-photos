@@ -6,6 +6,7 @@ import { connect } from 'react-redux'
 import { ScreenOrientation, Permissions } from 'expo'
 import { selectors, actions } from '@store'
 import AppNavigator from '@navigation/appNavigator'
+import console from '@utils/console'
 import { ScreenPropType } from './types'
 
 const propTypes = {
@@ -60,9 +61,7 @@ class App extends React.Component {
         this.props.dispatch(actions.photos.savePhotos(photos))
       }
     } catch (error) {
-      if (__DEV__) {
-        console.error(error)
-      }
+      console.error('[getPhotosFromCameraRoll]', error)
     }
   }
 
