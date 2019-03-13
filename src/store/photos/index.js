@@ -41,7 +41,7 @@ export const actions = {
             const timeout = Math.floor(idx++ / 49) * 2000
             // Send a reverse-geocode request to the Google Maps API.
             // Converts the latitude,longitude to an human readable address.
-            // Returns an array `[LATITUDE_LONGITUDE, Address || null]`
+            // Returns an array `[imageID, Address || null]`
             return reverseGeocode(item, timeout)
           }
         })

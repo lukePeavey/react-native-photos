@@ -45,18 +45,18 @@ class App extends React.Component {
         const data = await CameraRoll.getPhotos({
           first: 500,
           assetType: 'Photos',
-          groupTypes: 'SavedPhotos',
         })
         // Transform the data into an object map in which they keys are item IDs
         // and values are the corresponding item.
-        const photos = data.edges.reduce((ret, val) => {
-          const { group_name, ...rest } = val.node
+        const photos = data.edges.reduce((result, { node }) => {
+          const { group_name, timestamp, ...rest } = node
           const item = {
             id: rest.image.filename,
             groupName: group_name,
+            timestamp: timestamp * 1000,
             ...rest,
           }
-          return { ...ret, [item.id]: item }
+          return { ...result, [item.id]: item }
         }, {})
         // Save photos to redux state
         dispatch(actions.photos.savePhotos(photos))

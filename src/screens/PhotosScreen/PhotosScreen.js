@@ -57,7 +57,6 @@ export default class PhotosScreen extends React.Component {
     const { navigation } = this.props
     navigation.navigate('SlideShow', {
       initialIndex: index,
-      isFullscreen: true,
       image,
     })
   }

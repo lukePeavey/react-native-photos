@@ -64,7 +64,7 @@ export default class SingleAlbum extends React.Component {
     navigation.navigate('SlideShow', {
       albumName: navigation.getParam('albumName'),
       initialIndex: index,
-      isFullscreen: true,
+      fullScreen: false,
       image,
     })
   }
