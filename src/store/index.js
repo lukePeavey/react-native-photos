@@ -11,18 +11,23 @@ import photosReducer, {
   actions as photosActions,
   selectors as photosSelectors,
 } from '@store/photos'
+import geolocationsReducer, {
+  actions as geolocationsActions,
+  selectors as geolocationsSelectors,
+} from '@store/geolocations'
 
 const middleware = [thunk]
 
 const persistConfig = {
   storage,
-  key: `photos_v10003`,
+  key: `photos_v0.1`,
   blacklist: ['ui'],
 }
 
 const rootReducer = combineReducers({
   ui: uiReducer,
   photos: photosReducer,
+  geolocations: geolocationsReducer,
 })
 
 const persistedReducer = persistReducer(persistConfig, rootReducer)
@@ -33,5 +38,15 @@ export const store = createStore(
   composeWithDevTools(applyMiddleware(...middleware))
 )
 export const persistor = persistStore(store)
-export const selectors = { ui: uiSelectors, photos: photosSelectors }
-export const actions = { ui: uiActions, photos: photosActions }
+
+// Export action creators and selectors
+export const selectors = {
+  ui: uiSelectors,
+  photos: photosSelectors,
+  geolocations: geolocationsSelectors,
+}
+export const actions = {
+  ui: uiActions,
+  photos: photosActions,
+  geolocations: geolocationsActions,
+}

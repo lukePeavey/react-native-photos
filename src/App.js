@@ -32,38 +32,42 @@ class App extends React.Component {
     dispatch(actions.ui.updateScreenDimensions(screen))
   }
 
+  _requestCameraRollPermission = async () => {
+    try {
+      const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL)
+      return status
+    } catch (error) {
+      return 'denied'
+    }
+  }
+
   /**
    * Get data from the devices cameral roll and store it an application state
    */
   _getPhotosFromCameraRoll = async () => {
     const { dispatch } = this.props
-    try {
-      // Request permission to access cameral roll.
-      const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL)
-      if (status === 'granted') {
-        // Get all photos/videos from cameral roll
-        const data = await CameraRoll.getPhotos({
-          first: 500,
-          assetType: 'Photos',
-        })
-        // Transform the data into an object map in which they keys are item IDs
-        // and values are the corresponding item.
-        const photos = data.edges.reduce((result, { node }) => {
-          const { group_name, timestamp, ...rest } = node
-          const item = {
-            id: rest.image.filename,
-            groupName: group_name,
-            timestamp: timestamp * 1000,
-            ...rest,
-          }
-          return { ...result, [item.id]: item }
-        }, {})
-        // Save photos to redux state
-        dispatch(actions.photos.savePhotos(photos))
-        dispatch(actions.photos.reverseGeocodeImageLocations())
-      }
-    } catch (error) {
-      console.error('[getPhotosFromCameraRoll]', error)
+    const permissionStatus = await this._requestCameraRollPermission()
+    if (permissionStatus === 'granted') {
+      // Get all photos/videos from cameral roll
+      const data = await CameraRoll.getPhotos({
+        first: 500,
+        assetType: 'Photos',
+      })
+      // Transform the data into an object map in which they keys are item IDs
+      // and values are the corresponding item.
+      const photos = data.edges.reduce((result, { node }) => {
+        const { group_name, timestamp, ...rest } = node
+        const item = {
+          id: rest.image.filename,
+          groupName: group_name,
+          timestamp: timestamp * 1000,
+          ...rest,
+        }
+        return { ...result, [item.id]: item }
+      }, {})
+      // Save photos to redux state
+      dispatch(actions.photos.savePhotos(photos))
+      dispatch(actions.geolocations.reverseGeocodeImageLocations())
     }
   }
 
