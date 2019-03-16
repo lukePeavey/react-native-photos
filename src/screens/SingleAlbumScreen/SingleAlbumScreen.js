@@ -1,32 +1,27 @@
 /* eslint-disable no-unused-vars */
 import React from 'react'
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  Image,
-  Platform,
-  TouchableWithoutFeedback,
-} from 'react-native'
+import { StyleSheet, ScrollView, Platform } from 'react-native'
 import PropTypes from 'prop-types'
+import PhotoGrid from '@views/PhotoGrid'
+import * as Constants from '../../constants'
 import { PhotoPropType, ScreenPropType, NavigationPropType } from '../../types'
 
+/**
+|--------------------------------------------------
+| Prop Types
+|--------------------------------------------------
+*/
 const propTypes = {
   /** React navigation prop */
   navigation: NavigationPropType.isRequired,
-  /** Screen dimensions  */
-  screen: ScreenPropType.isRequired,
   /** Array of images */
-  images: PropTypes.arrayOf(PhotoPropType).isRequired,
+  photos: PropTypes.arrayOf(PhotoPropType).isRequired,
+  screen: ScreenPropType,
 }
 
-const IS_TABLET = Platform.OS === 'ios' && Platform.isPad
-const GUTTERS = IS_TABLET ? 16 : 2
-const ASPECT_RATIO = 1
-const RESIZE_MODE = IS_TABLET ? 'contain' : 'cover'
-
 /**
+ * Single Album Screen
+ * ---------------------
  * This screen displays the content of photo album.
  *
  * Photos are displayed as a grid of small thumbnail images. The user can
@@ -42,90 +37,52 @@ export default class SingleAlbum extends React.Component {
     title: navigation.getParam('albumName'),
   })
 
-  /** The number of columns in the image grid */
-  get _columns() {
-    const { screen } = this.props
-    if (IS_TABLET) {
-      return screen.isLandscape ? 7 : 5
-    }
-    return screen.isLandscape ? 7 : 4
+  state = { layout: null }
+
+  _onLayout = ({ nativeEvent }) => {
+    this.setState({ layout: nativeEvent.layout })
   }
 
-  /** The width height of each image */
-  get _imageSize() {
-    const { screen } = this.props
-    const width = (screen.width - GUTTERS * 2) / this._columns
-
-    return { width, height: width * ASPECT_RATIO }
-  }
-
-  _handlePressImage = (image, index) => {
+  _handlePressImage = (event, { item, index }) => {
     const { navigation } = this.props
     navigation.navigate('SlideShow', {
-      albumName: navigation.getParam('albumName'),
       initialIndex: index,
-      fullScreen: false,
-      image,
+      image: item,
     })
   }
 
-  /** Renders the header for each image collection */
-  _renderSectionHeader = section => {
-    return (
-      <View style={styles.sectionHeader}>
-        <Text style={styles.title}>{section.location}</Text>
-        <Text style={styles.subTitle}>{section.date}</Text>
-      </View>
-    )
-  }
-
-  /**
-   * Renders an individual item.
-   */
-  _renderItem = (item, index) => {
-    return (
-      <TouchableWithoutFeedback
-        onPress={() => this._handlePressImage(item, index)}
-        key={item.id}
-      >
-        <View style={[styles.item, this._imageSize]} key={item.id}>
-          <Image
-            source={{ uri: item.image.uri }}
-            style={styles.image}
-            resizeMode={RESIZE_MODE}
-          />
-        </View>
-      </TouchableWithoutFeedback>
-    )
-  }
-
   render() {
-    const { images } = this.props
+    const { photos, screen } = this.props
     return (
-      <ScrollView style={styles.container} contentContainerStyle={styles.grid}>
-        {images.map(this._renderItem)}
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.contentContainer}
+        onLayout={this._onLayout}
+        showsVerticalScrollIndicator={false}
+      >
+        {this.state.layout && (
+          <PhotoGrid
+            screen={screen}
+            photos={photos}
+            onPressItem={this._handlePressImage}
+            layout={this.state.layout}
+          />
+        )}
       </ScrollView>
     )
   }
 }
 
-SingleAlbum.propTypes = propTypes
-
+/**
+|--------------------------------------------------
+| Styles
+|--------------------------------------------------
+*/
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: GUTTERS,
-  },
-  grid: {
-    position: 'relative',
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  item: {
-    padding: IS_TABLET ? 4 : StyleSheet.hairlineWidth,
-  },
-  image: {
-    width: '100%',
-    height: '100%',
+    marginHorizontal: Constants.IS_TABLET ? 16 : 0,
   },
 })
+
+SingleAlbum.propTypes = propTypes

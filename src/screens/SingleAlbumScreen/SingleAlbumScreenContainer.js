@@ -5,7 +5,7 @@ import SingleAlbumScreen from './SingleAlbumScreen'
 const mapStateToProps = (state, props) => {
   const albumName = props.navigation.getParam('albumName')
   return {
-    images: selectors.photos.getPhotosByAlbum(state, albumName),
+    photos: selectors.photos.getPhotosByAlbum(state, albumName),
     screen: selectors.ui.getScreen(state),
   }
 }
